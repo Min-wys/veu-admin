@@ -7,7 +7,7 @@
       >添加</el-button
     >
     <el-table :data="tradeMarkList" border style="width: 100%; margin: 20px 0">
-      <el-table-column prop="id" label="序号" width="100" align="center">
+      <el-table-column type="index" label="序号" width="100" align="center">
       </el-table-column>
       <el-table-column prop="tmName" label="品牌名称"> </el-table-column>
       <el-table-column label="品牌LOGO"
@@ -16,9 +16,14 @@
         /></template>
       </el-table-column>
       <el-table-column prop="address" label="操作">
-        <template>
+        <template slot-scope="scope">
           <el-button type="warning" icon="el-icon-edit">修改</el-button>
-          <el-button type="danger" icon="el-icon-delete">删除</el-button>
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            @click="deleteTardemarkList(scope.row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -108,7 +113,7 @@ export default {
       // 发送请求
       const result = await this.$API.trademark.getPageList(page, limit);
       if (result.code === 200) {
-        this.$message.success("数据列表请求成功");
+        // this.$message.success("数据列表请求成功");
         this.tradeMarkList = result.data.records;
         this.page = result.data.current; // 修改当前页
         this.limit = result.data.size; // 修改显示条数
@@ -150,7 +155,7 @@ export default {
             this.tradeMarkForm
           );
           if (result.code === 200) {
-            this.$message.success("数据列表请求成功");
+            // this.$message.success("数据列表请求成功");
             this.tradeMarkVisible = false;
             this.getTradeMarkList(this.page, this.limit); // 更新一下数据
           } else {
@@ -158,6 +163,41 @@ export default {
           }
         }
       });
+    },
+
+    // 删除数据
+    deleteTardemarkList(trademark) {
+      this.$confirm(`确定删除${trademark.tmName}吗?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async () => {
+          console.log(222);
+          const result = await this.$API.trademark.deleteTradeMarkList(
+            trademark.id
+          );
+          if (result.code === 200) {
+            this.$message.success("删除成功");
+            console.log(this.tradeMarkList.length);
+            this.getTradeMarkList(
+              this.tradeMarkList.length === 1 ? this.page - 1 : this.page,
+              this.limit
+            ); // 更新一下数据
+          } else {
+            this.$message.error("数据删除失败");
+          }
+          // this.$message({
+          //   type: "success",
+          //   message: "删除成功!",
+          // });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
   },
   async mounted() {

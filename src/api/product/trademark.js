@@ -29,5 +29,15 @@ export default {
       method: "POST",
       data
     });
+  },
+
+  /*
+  删除数据
+  */
+  deleteTradeMarkList(id) {
+    return request({
+      url: `${API_NAME}/remove/${id}`,
+      method: "DELETE"
+    });
   }
 };
