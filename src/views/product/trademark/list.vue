@@ -1,6 +1,11 @@
 <template>
   <div>
-    <el-button type="primary" icon="el-icon-plus">添加</el-button>
+    <el-button
+      type="primary"
+      icon="el-icon-plus"
+      @click="tradeMarkVisible = true"
+      >添加</el-button
+    >
     <el-table :data="tradeMarkList" border style="width: 100%; margin: 20px 0">
       <el-table-column prop="id" label="序号" width="100" align="center">
       </el-table-column>
@@ -30,10 +35,49 @@
       class="trademark-pagination"
     >
     </el-pagination>
+
+    <!-- 添加按钮的弹窗 -->
+    <el-dialog title="提示" :visible.sync="tradeMarkVisible" width="50%">
+      <!-- 品牌属性的表单 -->
+      <el-form
+        ref="form"
+        :model="tradeMarkForm"
+        :rules="rules"
+        label-width="100px"
+      >
+        <el-form-item label="品牌属性" prop="tmName">
+          <el-input v-model="tradeMarkForm.tmName"></el-input>
+        </el-form-item>
+        <el-form-item label="品牌LOGO" prop="logoUrl">
+          <el-upload
+            class="avatar-uploader"
+            :action="`${this.$BASE_API}/admin/product/fileUpload`"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+          >
+            <img
+              v-if="tradeMarkForm.logoUrl"
+              :src="tradeMarkForm.logoUrl"
+              class="avatar"
+            />
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
+          <span>只能上传jpg/png文件，且不超过50kb</span>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="tradeMarkVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitForm('form')">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+// @click="tradeMarkVisible = false"
+// 可以不用引入api直接使用$API,已将在挂载到原型对象上了
 // import trademark from "@/api/product/trademark";
 
 export default {
@@ -44,24 +88,32 @@ export default {
       page: 1, // 当前页
       limit: 3, // 当前页展示多少数据
       total: 0, // 总数
+      tradeMarkVisible: false, // 控制弹窗的隐藏和显示
+      tradeMarkForm: {
+        tmName: "", // 属性名称
+        logoUrl: "", // logo地址
+      }, // 添加弹框品牌表单的数据
+      rules: {
+        // 表单校验，是必填的，提示，在表单失去焦点时触发
+        tmName: [
+          { required: true, message: "请输入品牌属性", trigger: "blur" },
+        ],
+        logoUrl: [{ required: true, message: "请上传图片" }],
+      },
     };
   },
   methods: {
     // 定义请求列表数据的方法
     async getTradeMarkList(page, limit) {
-      try {
-        const result = await this.$API.trademark.getPageList(page, limit);
-        console.log(result);
-        if (result.code === 200) {
-          this.$message.success("数据列表请求成功");
-          this.tradeMarkList = result.data.records;
-          this.page = result.data.current; // 修改当前页
-          this.limit = result.data.size; // 修改显示条数
-          this.total = result.data.total; // 获取数据的总数
-        } else {
-          this.$message.error("数据列表请求失败");
-        }
-      } catch {
+      // 发送请求
+      const result = await this.$API.trademark.getPageList(page, limit);
+      if (result.code === 200) {
+        this.$message.success("数据列表请求成功");
+        this.tradeMarkList = result.data.records;
+        this.page = result.data.current; // 修改当前页
+        this.limit = result.data.size; // 修改显示条数
+        this.total = result.data.total; // 获取数据的总数
+      } else {
         this.$message.error("数据列表请求失败");
       }
     },
@@ -69,6 +121,44 @@ export default {
     // handleSizeChange() {},
     // 当前页变化时
     // handleCurrentChange() {},
+
+    // 图片上传成功
+    handleAvatarSuccess(res, file) {
+      // 将图片的地址赋值给tradeMarkForm.imageUrl
+      this.tradeMarkForm.logoUrl = res.data;
+    },
+    // 图片上传前
+    beforeAvatarUpload(file) {
+      // 设置白名单
+      const imgType = ["image/jpeg", "image/jpg", "image/png"];
+      const isImgType = imgType.indexOf(file.type) > -1;
+      const isLt = file.size / 1024 < 50;
+
+      if (!isImgType) {
+        this.$message.error("上传品牌LOGO只能是 JPG或者是png 格式!");
+      }
+      if (!isLt) {
+        this.$message.error("上传品牌图片大小不能超过 50kB!");
+      }
+      return isImgType && isImgType;
+    },
+    // 表单提交事件
+    submitForm(form) {
+      this.$refs[form].validate(async (valid) => {
+        if (valid) {
+          const result = await this.$API.trademark.addTradeMarkList(
+            this.tradeMarkForm
+          );
+          if (result.code === 200) {
+            this.$message.success("数据列表请求成功");
+            this.tradeMarkVisible = false;
+            this.getTradeMarkList(this.page, this.limit); // 更新一下数据
+          } else {
+            this.$message.error("数据列表请求失败");
+          }
+        }
+      });
+    },
   },
   async mounted() {
     // 获取所有的品牌数据
@@ -78,11 +168,33 @@ export default {
   },
 };
 </script>
-<style lang="sass">
-.trademark-img
+<style lang="sass" scoped>
+>>>.trademark-img
   width: 100px
-.trademark-pagination
+>>>.trademark-pagination
   text-align: right
-.el-pagination__sizes
+>>>.el-pagination__sizes
   margin-left: 250px
+>>>.avatar-uploader .el-upload
+  border: 1px dashed #d9d9d9
+  border-radius: 6px
+  cursor: pointer
+  position: relative
+  overflow: hidden
+
+  &:hover
+    border-color: #409EFF
+
+>>>.avatar-uploader-icon
+  font-size: 28px
+  color: #8c939d
+  width: 178px
+  height: 178px
+  line-height: 178px
+  text-align: center
+
+>>>.avatar
+  width: 178px
+  height: 178px
+  display: block
 </style>

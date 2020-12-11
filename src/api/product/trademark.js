@@ -12,10 +12,22 @@ export default {
   /*
   获取订单分页列表(带搜索)
   */
+
   getPageList(page, limit) {
     return request({
       url: `${API_NAME}/${page}/${limit}`,
-      method: "GET",
+      method: "GET"
+    });
+  },
+
+  /*
+  添加数据
+  */
+  addTradeMarkList(data) {
+    return request({
+      url: `${API_NAME}/save`,
+      method: "POST",
+      data
     });
   }
 };
