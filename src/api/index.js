@@ -6,3 +6,5 @@ export { default as category } from "./category";
 export { default as clientUser } from "./clientUser";
 export { default as order } from "./order";
 export { default as trademark } from "./product/trademark";
+// 引入商品属性
+export { default as attr } from "./product/attr";

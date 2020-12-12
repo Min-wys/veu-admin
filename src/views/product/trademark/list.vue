@@ -1,7 +1,12 @@
 <template>
   <div>
     <el-button type="primary" icon="el-icon-plus" @click="add">添加</el-button>
-    <el-table :data="tradeMarkList" border style="width: 100%; margin: 20px 0">
+    <el-table
+      :data="tradeMarkList"
+      v-loading="loading"
+      border
+      style="width: 100%; margin: 20px 0"
+    >
       <el-table-column type="index" label="序号" width="100" align="center">
       </el-table-column>
       <el-table-column prop="tmName" label="品牌名称"> </el-table-column>
@@ -97,6 +102,7 @@ export default {
       limit: 3, // 当前页展示多少数据
       total: 0, // 总数
       tradeMarkVisible: false, // 控制弹窗的隐藏和显示
+      loading: false, // loading图片加载图片
       tradeMarkForm: {
         tmName: "", // 属性名称
         logoUrl: "", // logo地址
@@ -113,6 +119,8 @@ export default {
   methods: {
     // 定义请求列表数据的方法
     async getTradeMarkList(page, limit) {
+      // 发送请求前显示loading图片
+      this.loading = true;
       // 发送请求
       const result = await this.$API.trademark.getPageList(page, limit);
       if (result.code === 200) {
@@ -124,6 +132,8 @@ export default {
       } else {
         this.$message.error("数据列表请求失败");
       }
+      // 发送请求完后隐藏loading图片
+      this.loading = false;
     },
     // 当每页显示的数据变化时
     // handleSizeChange() {},
@@ -245,7 +255,10 @@ export default {
       // 清空表单的校验结果
       this.$refs.form && this.$refs.form.clearValidate();
       this.tradeMarkVisible = true;
-      this.tradeMarkForm = {}; // 把from表单的数据清空，这样显示的数据就是空的，表单的数据是双向的v-model
+      this.tradeMarkForm = {
+        tmName: "",
+        logoUrl: "",
+      }; // 把from表单的数据清空，这样显示的数据就是空的，表单的数据是双向的v-model
     },
   },
   async mounted() {

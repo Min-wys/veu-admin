@@ -3,9 +3,14 @@
     <el-card>
       <el-form :inline="true" :model="attrList" class="demo-form-inline">
         <el-form-item label="一级分类">
-          <el-select v-model="attrList.region" placeholder="请选择">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="attrList.category1Id" placeholder="请选择">
+            <el-option
+              :label="category1Id.name"
+              value="category1Id.name"
+              v-for="category1Id in attrList.category1Id"
+              :key="category1Id.id"
+            ></el-option>
+            <!-- <el-option label="区域二" value="beijing"></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item label="二级分类">
@@ -66,8 +71,16 @@ export default {
   name: "AttrList",
   data() {
     return {
-      attrList: {},
+      attrList: {
+        category1Id: [], // 一级列表数据
+        category2Id: "",
+        category3Id: "",
+      },
     };
+  },
+  async mounted() {
+    const result = await this.$API.attr.getCategory1();
+    this.attrList.category1Id = result.data;
   },
 };
 </script>
