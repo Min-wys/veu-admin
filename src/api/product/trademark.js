@@ -39,5 +39,15 @@ export default {
       url: `${API_NAME}/remove/${id}`,
       method: "DELETE"
     });
+  },
+  /*、
+  修改数据数据
+  */
+  updateTradeMarkList(data) {
+    return request({
+      url: `${API_NAME}/update`,
+      method: "PUT",
+      data
+    });
   }
 };

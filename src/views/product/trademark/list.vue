@@ -1,11 +1,6 @@
 <template>
   <div>
-    <el-button
-      type="primary"
-      icon="el-icon-plus"
-      @click="tradeMarkVisible = true"
-      >添加</el-button
-    >
+    <el-button type="primary" icon="el-icon-plus" @click="add">添加</el-button>
     <el-table :data="tradeMarkList" border style="width: 100%; margin: 20px 0">
       <el-table-column type="index" label="序号" width="100" align="center">
       </el-table-column>
@@ -17,7 +12,12 @@
       </el-table-column>
       <el-table-column prop="address" label="操作">
         <template slot-scope="scope">
-          <el-button type="warning" icon="el-icon-edit">修改</el-button>
+          <el-button
+            type="warning"
+            icon="el-icon-edit"
+            @click="updateTrademarkList(scope.row)"
+            >修改</el-button
+          >
           <el-button
             type="danger"
             icon="el-icon-delete"
@@ -42,7 +42,11 @@
     </el-pagination>
 
     <!-- 添加按钮的弹窗 -->
-    <el-dialog title="提示" :visible.sync="tradeMarkVisible" width="50%">
+    <el-dialog
+      :title="`${tradeMarkForm.id ? '修改' : '添加'}品牌属性`"
+      :visible.sync="tradeMarkVisible"
+      width="50%"
+    >
       <!-- 品牌属性的表单 -->
       <el-form
         ref="form"
@@ -81,7 +85,6 @@
 </template>
 
 <script>
-// @click="tradeMarkVisible = false"
 // 可以不用引入api直接使用$API,已将在挂载到原型对象上了
 // import trademark from "@/api/product/trademark";
 
@@ -89,7 +92,7 @@ export default {
   name: "TrademarkList",
   data() {
     return {
-      tradeMarkList: [], // 所有品牌的数据
+      tradeMarkList: [], // 列表所有品牌的数据
       page: 1, // 当前页
       limit: 3, // 当前页展示多少数据
       total: 0, // 总数
@@ -150,10 +153,39 @@ export default {
     // 表单提交事件
     submitForm(form) {
       this.$refs[form].validate(async (valid) => {
+        // 是否有值
         if (valid) {
-          const result = await this.$API.trademark.addTradeMarkList(
-            this.tradeMarkForm
-          );
+          // 判断值是否进行了修改
+          const isUpdate = !!this.tradeMarkForm.id;
+          // 要先确定是修改数据操作
+          if (isUpdate) {
+            const tradeMarkItem = this.tradeMarkList.find(
+              (item) => item.id === this.tradeMarkForm.id
+            );
+            // 在判断是否修改了数据值
+            if (
+              this.tradeMarkForm.tmName === tradeMarkItem.tmName &&
+              this.tradeMarkForm.logoUrl === tradeMarkItem.logoUrl
+            ) {
+              this.$message.warning("不能提交相同数据");
+              return;
+            }
+          }
+
+          // 根据是否有id值判断是修改还是添加，变量定义在外面
+          let result;
+          if (isUpdate) {
+            // 有id值是修改数据
+            result = await this.$API.trademark.updateTradeMarkList(
+              this.tradeMarkForm
+            );
+          } else {
+            // 没有id值是添加数据值
+            result = await this.$API.trademark.addTradeMarkList(
+              this.tradeMarkForm
+            );
+          }
+          // 判断返回的数据功能是否成功
           if (result.code === 200) {
             // this.$message.success("数据列表请求成功");
             this.tradeMarkVisible = false;
@@ -198,6 +230,22 @@ export default {
             message: "已取消删除",
           });
         });
+    },
+    // 修改数据
+    updateTrademarkList(trademark) {
+      // 清空表单的校验结果
+      this.$refs.form && this.$refs.form.clearValidate();
+      // 让弹窗显示
+      this.tradeMarkVisible = true;
+      // 进行赋值
+      this.tradeMarkForm = { ...trademark }; // 这里要使用结构赋值，赋值一个新的对象，这样就不会修改trademark上的数据
+    },
+    // 添加
+    add() {
+      // 清空表单的校验结果
+      this.$refs.form && this.$refs.form.clearValidate();
+      this.tradeMarkVisible = true;
+      this.tradeMarkForm = {}; // 把from表单的数据清空，这样显示的数据就是空的，表单的数据是双向的v-model
     },
   },
   async mounted() {
