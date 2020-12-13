@@ -8,5 +8,34 @@ export default {
       method: "GET",
       url: `${API_NAME}/getCategory1`
     });
+  },
+  // 获取二级分类列表的数据
+  getCategory2(category1Id) {
+    return request({
+      method: "GET",
+      url: `${API_NAME}/getCategory2/${category1Id}`
+    });
+  },
+  // 获取三级分类列表的数据
+  getCategory3(category2Id) {
+    return request({
+      method: "GET",
+      url: `${API_NAME}/getCategory3/${category2Id}`
+    });
+  },
+  // 获取下面属性列表的数据
+  getAttrsList({ category1Id, category2Id, category3Id }) {
+    return request({
+      method: "GET",
+      url: `${API_NAME}/attrInfoList/${category1Id}/${category2Id}/${category3Id}`
+    });
+  },
+  // 添加商品属性
+  saveAttrInfo(data) {
+    return request({
+      method: "POST",
+      url: `${API_NAME}/saveAttrInfo`,
+      data
+    });
   }
 };
