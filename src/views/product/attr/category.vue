@@ -100,7 +100,7 @@ export default {
     async attrsList(category3) {
       const attrs = {
         ...this.category,
-        category3,
+        category3Id: category3,
       };
       this.$emit("change", attrs);
 

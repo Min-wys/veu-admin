@@ -3,7 +3,13 @@
     <Category @change="getAttrsList" :disabled="!isShow" />
     <!-- 下面区域 -->
     <el-card style="margin-top: 20px" v-show="isShow">
-      <el-button type="primary" icon="el-icon-plus">添加属性</el-button>
+      <el-button
+        type="primary"
+        icon="el-icon-plus"
+        @click="addAttrList"
+        :disabled="disabled"
+        >添加属性</el-button
+      >
       <el-table :data="attrList" border style="width: 100%">
         <el-table-column type="index" label="序号" width="80" align="center">
         </el-table-column>
@@ -30,11 +36,17 @@
               size="mini"
               @click="update(row)"
             ></el-button>
-            <el-button
-              type="danger"
-              icon="el-icon-delete"
-              size="mini"
-            ></el-button>
+            <el-popconfirm
+              @onConfirm="delAttrList(row)"
+              :title="`确定删除 ${row.attrName} 吗？`"
+            >
+              <el-button
+                type="danger"
+                icon="el-icon-delete"
+                size="mini"
+                slot="reference"
+              ></el-button
+            ></el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -48,7 +60,11 @@
         </el-form-item>
       </el-form>
 
-      <el-button type="primary" icon="el-icon-plus" @click="addAttr"
+      <el-button
+        type="primary"
+        icon="el-icon-plus"
+        @click="addAttr"
+        :disabled="!attr.attrName"
         >添加属性值</el-button
       >
 
@@ -93,7 +109,7 @@
         </el-table-column>
       </el-table>
       <el-button type="primary" @click="save">保存</el-button>
-      <el-button @click="isShow = false">取消</el-button>
+      <el-button @click="isShow = true">取消</el-button>
     </el-card>
   </div>
 </template>
@@ -107,10 +123,13 @@ export default {
     return {
       attrList: [], //属性值数据
       isShow: true,
+      disabled: true,
       attr: {
         //一行数据
-        attrName: "",
-        attrValueList: [],
+        attrName: "", // 属性名
+        attrValueList: [], // 属性值列表
+        categoryId: "", // 当前第3级分类ID
+        categoryLevel: 3, // 分类级别
       },
     };
   },
@@ -130,6 +149,8 @@ export default {
     async getAttrsList(category) {
       this.category = category;
       const result = await this.$API.attr.getAttrsList(category);
+      // 修改添加按钮的状态
+      this.disabled = false;
       if (result.code === 200) {
         this.$message.success("属性数据请求成功");
         this.attrList = result.data;
@@ -165,7 +186,7 @@ export default {
       // 隐藏输入框
       row.edit = false;
     },
-    // 添加属性
+    // 添加属性值
     addAttr() {
       this.attr.attrValueList.push({ edit: true });
       this.$nextTick(() => {
@@ -189,7 +210,30 @@ export default {
       // 回到开始页面
       this.isShow = true;
     },
+    // 添加属性
+    addAttrList() {
+      this.isShow = false;
+      console.log(this.category);
+      console.log(this.category.category3Id);
+      // 清空之前的数据
+      this.attr = {
+        attrName: "", // 属性名
+        attrValueList: [], // 属性值列表
+        categoryId: this.category.category3Id, // 当前第3级分类ID
+        categoryLevel: 3, // 分类级别
+      };
+    },
+    // 删除属性
+    async delAttrList(row) {
+      console.log(row);
+      const result = await this.$API.attr.delAttrInfo(row.id);
+      if (result.code === 200) {
+        this.$message.success("属性删除成功");
+        this.getAttrsList(this.category);
+      } else {
+        this.$message.error("属性删除失败");
+      }
+    },
   },
 };
 </script>
-//
