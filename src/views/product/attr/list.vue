@@ -1,13 +1,17 @@
 <template>
   <div>
-    <Category @change="getAttrsList" :disabled="!isShow" />
+    <Category
+      @change="getAttrsList"
+      :disabled="!isShow"
+      @showAttrList="showAttrList"
+    />
     <!-- 下面区域 -->
     <el-card style="margin-top: 20px" v-show="isShow">
       <el-button
         type="primary"
         icon="el-icon-plus"
         @click="addAttrList"
-        :disabled="disabled"
+        :disabled="!category.category3Id"
         >添加属性</el-button
       >
       <el-table :data="attrList" border style="width: 100%">
@@ -115,7 +119,7 @@
 </template>
 
 <script>
-import Category from "./category";
+import Category from "@/components/Category";
 
 export default {
   name: "AttrList",
@@ -123,7 +127,6 @@ export default {
     return {
       attrList: [], //属性值数据
       isShow: true,
-      disabled: true,
       attr: {
         //一行数据
         attrName: "", // 属性名
@@ -131,11 +134,23 @@ export default {
         categoryId: "", // 当前第3级分类ID
         categoryLevel: 3, // 分类级别
       },
+      category: {
+        //三个id值
+        category1Id: "",
+        category2Id: "",
+        category3Id: "",
+      },
     };
   },
   components: {
     Category,
   },
+  // watch: {
+  //   category() {
+  //     this.attr.attrValueList = [];
+  //     // this.category.category3Id = "";
+  //   },
+  // },
   // 解决获取焦点失效
   // directives: {
   //   focus: {
@@ -149,8 +164,6 @@ export default {
     async getAttrsList(category) {
       this.category = category;
       const result = await this.$API.attr.getAttrsList(category);
-      // 修改添加按钮的状态
-      this.disabled = false;
       if (result.code === 200) {
         this.$message.success("属性数据请求成功");
         this.attrList = result.data;
@@ -213,19 +226,17 @@ export default {
     // 添加属性
     addAttrList() {
       this.isShow = false;
-      console.log(this.category);
-      console.log(this.category.category3Id);
       // 清空之前的数据
       this.attr = {
         attrName: "", // 属性名
         attrValueList: [], // 属性值列表
         categoryId: this.category.category3Id, // 当前第3级分类ID
         categoryLevel: 3, // 分类级别
+        id: "",
       };
     },
     // 删除属性
     async delAttrList(row) {
-      console.log(row);
       const result = await this.$API.attr.delAttrInfo(row.id);
       if (result.code === 200) {
         this.$message.success("属性删除成功");
@@ -233,6 +244,11 @@ export default {
       } else {
         this.$message.error("属性删除失败");
       }
+    },
+    // 修改三级列表，下面的属性列表要没有
+    showAttrList() {
+      this.attrList = [];
+      this.category.category3Id = "";
     },
   },
 };

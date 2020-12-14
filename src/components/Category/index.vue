@@ -82,6 +82,7 @@ export default {
       } else {
         this.$message.error("二级分类请求失败");
       }
+      this.$bus.$emit("showAttrList");
     },
     // 获取三级分类数据
     async category3List(category2) {
@@ -95,6 +96,7 @@ export default {
       } else {
         this.$message.error("三级分类请求失败");
       }
+      this.$bus.$emit("showAttrList");
     },
     // 获取属性数据
     async attrsList(category3) {
@@ -102,7 +104,7 @@ export default {
         ...this.category,
         category3Id: category3,
       };
-      this.$emit("change", attrs);
+      this.$bus.$emit("change", attrs);
 
       // const result = await this.$API.attr.getAttrsList(attrs);
       // if (result.code === 200) {
@@ -116,6 +118,7 @@ export default {
     },
   },
   async mounted() {
+    // this.category.category3Id = "";
     // 获取一级分类数据
     const result = await this.$API.attr.getCategory1();
     if (result.code === 200) {
@@ -124,10 +127,10 @@ export default {
     } else {
       this.$message.error("一级分类请求失败");
     }
+    this.$emit("showAttrList");
   },
 };
 </script>
 
 <style lang="less" scoped>
 </style>
-
