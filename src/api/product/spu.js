@@ -31,10 +31,13 @@ export default {
     });
   },
   // 获取分页数据/admin/product/{page}/{limit}
-  saveSpuInfo(spuId) {
+  getSpuList({ page, limit, category3Id }) {
     return request({
-      url: `${API_NAME}/saveSpuInfo`,
-      method: "POST"
+      url: `${API_NAME}/${page}/${limit}`,
+      method: "GET",
+      params: {
+        category3Id
+      }
     });
   }
 };

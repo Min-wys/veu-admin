@@ -1,10 +1,11 @@
 <template>
   <div>
-    <Category
+    <!-- <Category
       @change="getAttrsList"
       :disabled="!isShow"
       @showAttrList="showAttrList"
-    />
+    /> -->
+    <Category :disabled="!isShow" />
     <!-- 下面区域 -->
     <el-card style="margin-top: 20px" v-show="isShow">
       <el-button
@@ -250,6 +251,14 @@ export default {
       this.attrList = [];
       this.category.category3Id = "";
     },
+  },
+  mounted() {
+    this.$bus.$on("change", this.getAttrsList);
+    this.$bus.$on("showAttrList", this.showAttrList);
+  },
+  beforeDestroy() {
+    this.$bus.$off("change", this.getAttrsList);
+    this.$bus.$off("showAttrList", this.showAttrList);
   },
 };
 </script>

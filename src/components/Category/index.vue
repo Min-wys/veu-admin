@@ -127,7 +127,7 @@ export default {
     } else {
       this.$message.error("一级分类请求失败");
     }
-    this.$emit("showAttrList");
+    this.$bus.$emit("showAttrList");
   },
 };
 </script>

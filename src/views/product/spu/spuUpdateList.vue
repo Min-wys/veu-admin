@@ -61,7 +61,6 @@
                 type="warning"
                 icon="el-icon-edit"
                 size="mini"
-                @click="update(row)"
               ></el-button>
               <el-button
                 type="danger"
@@ -83,6 +82,7 @@
 <script>
 export default {
   name: "SpuUpdateList",
+  methods: {},
 };
 </script>
 
