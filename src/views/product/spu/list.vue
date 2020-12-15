@@ -32,11 +32,20 @@ export default {
       this.isShowList = false;
       this.item = { ...row };
     },
+    // 关闭更新页面
+    showUpdateListCancel() {
+      this.isShowList = true;
+      this.$bus.$emit("showList");
+    },
   },
   components: {
     Category,
     SpuShowList,
     SpuUpdateList,
+  },
+  mounted() {
+    // 关闭更新页面
+    this.$bus.$on("cancel", this.showUpdateListCancel);
   },
 };
 </script>

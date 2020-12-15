@@ -25,10 +25,11 @@
         <el-upload
           class="avatar-uploader"
           list-type="picture-card"
-          :file-list="spuImageList"
+          :file-list="forgatSpuImageList"
           :on-preview="handlePictureCardPreview"
           :on-remove="handleRemove"
           :action="`${$BASE_API}/admin/product/fileUpload`"
+          :on-success="handleAvatarSuccess"
         >
           <i class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
@@ -38,16 +39,22 @@
       <el-form-item label="销售属性">
         <el-select
           :placeholder="`还剩${filterSaleAttrList.length}个未选择`"
-          v-model="spu.saleAttrId"
+          v-model="spu.sale"
         >
           <el-option
             v-for="sale in filterSaleAttrList"
             :key="sale.id"
-            :value="sale.id"
+            :value="`${sale.id}-${sale.name}`"
             :label="sale.name"
           ></el-option>
         </el-select>
-        <el-button type="primary" icon="el-icon-plus">添加销售属性</el-button>
+        <el-button
+          type="primary"
+          icon="el-icon-plus"
+          :disabled="!spu.sale"
+          @click="addSaleAttr(spu.sale)"
+          >添加销售属性</el-button
+        >
         <el-table
           :data="spuSaleAttrList"
           border
@@ -59,34 +66,54 @@
           </el-table-column>
 
           <el-table-column label="属性值列表">
-            <template v-slot="{ row }">
+            <template v-slot="{ row, $index }">
               <el-tag
-                style="margin-right: 5px"
+                closable
+                :disable-transitions="false"
+                @close="handleClose($index)"
                 v-for="attrVal in row.spuSaleAttrValueList"
                 :key="attrVal.id"
                 >{{ attrVal.saleAttrValueName }}</el-tag
               >
+              <el-input
+                class="input-new-tag"
+                v-if="row.edit"
+                v-model="inputValue"
+                ref="input"
+                size="small"
+                @keyup.enter.native="handleInputConfirm(row)"
+                @blur="handleInputConfirm(row)"
+              >
+              </el-input>
+              <el-button
+                v-else
+                class="button-new-tag"
+                size="small"
+                @click="showInput(row)"
+                >+ 添加</el-button
+              >
             </template>
           </el-table-column>
           <el-table-column label="操作" width="150">
-            <template>
-              <el-button
-                type="warning"
-                icon="el-icon-edit"
-                size="mini"
-              ></el-button>
-              <el-button
-                type="danger"
-                icon="el-icon-delete"
-                size="mini"
-              ></el-button>
+            <template v-slot="{ row, $index }">
+              <el-popconfirm
+                @onConfirm="delSpuSaleAttr($index)"
+                :title="`确定删除 ${row.saleAttrName} 吗？`"
+              >
+                <el-button
+                  type="danger"
+                  icon="el-icon-delete"
+                  size="mini"
+                  slot="reference"
+                ></el-button
+              ></el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
       </el-form-item>
       <el-form-item>
         <el-button type="primary">保存</el-button>
-        <el-button>取消</el-button>
+        <el-button @click="cancel">取消</el-button>
       </el-form-item>
     </el-form>
     <el-dialog :visible.sync="dialogVisible">
@@ -108,6 +135,7 @@ export default {
       dialogVisible: false, // 放大的图片显示
       spuSaleAttrList: [], // 当前spu的销售属性数据
       saleAttrList: [], // 所有spu的销售属性数据
+      inputValue: "", // 输入框的内容
     };
   },
   props: ["item"],
@@ -121,12 +149,111 @@ export default {
         );
       });
     },
+    // 计算得出新的图片数组
+    forgatSpuImageList() {
+      return this.spuImageList.map((item) => {
+        return {
+          // 计算属性也要添加uid属性，一开始没有uid属性，就使用id属性，当uid属性
+          uid: item.uid || item.id,
+          id: item.id,
+          name: item.imgName,
+          url: item.imgUrl,
+        };
+      });
+    },
   },
   methods: {
+    // 点击取消按钮
+    cancel() {
+      // 隐藏修改框
+      this.$bus.$emit("cancel");
+    },
+    // 删除属性
+    delSpuSaleAttr(index) {
+      this.spuSaleAttrList.splice(index, 1);
+    },
+    // 删除当前属性值
+    handleClose(index) {
+      row.spuSaleAttrValueList.splice(index, 1);
+    },
+    // 显示当前输入框，并获取焦点
+    showInput(row) {
+      // 给row设置响应式的数据
+      this.$set(row, "edit", true);
+      // 解决获取焦点失效
+      this.$nextTick(() => {
+        //自动获取焦点 element组件autofocus失效
+        this.$refs.input.focus();
+      });
+    },
+    // 输入框失去焦点时
+    handleInputConfirm(row) {
+      // 如果输入框的内容有值就直接添加
+      if (this.inputValue) {
+        row.spuSaleAttrValueList.push({
+          baseSaleAttrId: row.baseSaleAttrId,
+          saleAttrName: row.saleAttrName,
+          saleAttrValueName: this.inputValue,
+          spuId: row.spuId,
+        });
+        // 清空输入框的内容
+        this.inputValue = "";
+      }
+      // 隐藏输入框
+      row.edit = false;
+    },
+    // 图片上传成功
+    handleAvatarSuccess(res, file) {
+      // 给spu图片的数组添加一个数值
+      // res返回上传成功结果, file：当前上传的图片信息
+      this.spuImageList.push({
+        // 上传图片要添加一个uid属性，才不会出现闪烁的情况
+        uid: file.uid,
+        imgName: file.url,
+        imgUrl: res.data,
+        spuId: this.spu.id,
+      });
+    },
+    // 点击添加销售属性
+    // addSaleAttr(saleAttrId) {
+    //   // 找到id对应的所有销售属性
+    //   const saleAttr = this.saleAttrList.find(
+    //     (saleAttr) => saleAttr.id === saleAttrId
+    //   );
+    //   // 给当前销售属性值添加数据
+    //   this.spuSaleAttrList.push({
+    //     saleAttrName: saleAttr.name,
+    //     baseSaleAttrId: saleAttrId,
+    //     // spuSaleAttrValueList: [
+    //     //   {
+    //     //     // baseSaleAttrId: saleAttrId,
+    //     //     // saleAttrName: saleAttr.name,
+    //     //   },
+    //     // ],
+    //   });
+    //   // 清空select的内容
+    //   this.spu.saleAttrId = "";
+    // },
     // 删除spu图片
+    //
+    /* 点击添加的方式二：常用！select的v-mode的值和option的value的值相同的，value中传什么值，select就接收什么值 */
+    addSaleAttr(sale) {
+      // sale的值是${sale.id}-${sale.name}
+      const [baseSaleAttrId, saleAttrName] = sale.split("-");
+      this.spuSaleAttrList.push({
+        saleAttrName,
+        baseSaleAttrId: +baseSaleAttrId,
+        spuSaleAttrValueList: [],
+        spuId: this.spu.id,
+      });
+      // 清空select输入框的数据
+      this.spu.sale = "";
+    },
+    // 删除图片展示的图片数据
     handleRemove(file, fileList) {
       this.spuImageList = this.spuImageList.filter(
-        (item) => item.id !== file.id
+        // 比较Url地址是否相同，id无法比较
+        (item) => item.imgUrl !== file.url
       );
     },
     // 处理图片预览
@@ -150,13 +277,7 @@ export default {
       if (result.code === 200) {
         this.$message.success("所有图片数据获取成功");
         // 进行过滤数值，elementui中要求是name和url的形式
-        this.spuImageList = result.data.map((item) => {
-          return {
-            id: item.id,
-            name: item.imgName,
-            url: item.imgUrl,
-          };
-        });
+        this.spuImageList = result.data;
       } else {
         this.$message.error(result.message);
       }
@@ -195,5 +316,19 @@ export default {
 };
 </script>
 
-<style>
+<style lang="sass" scoped>
+>>>.el-tag + .el-tag
+  margin-left: 10px
+
+>>>.button-new-tag
+  margin-left: 10px
+  height: 32px
+  line-height: 30px
+  padding-top: 0
+  padding-bottom: 0
+
+>>>.input-new-tag
+  width: 90px
+  margin-left: 10px
+  vertical-align: bottom
 </style>

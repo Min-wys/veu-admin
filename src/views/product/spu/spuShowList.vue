@@ -63,7 +63,7 @@ export default {
   },
   methods: {
     // 获取spu分页数据
-    async getSpuList(page, limit) {
+    async getSpuList(page = 1, limit = 3) {
       const { category3Id } = this.category;
       const result = await this.$API.spu.getSpuList({
         page,
@@ -78,6 +78,7 @@ export default {
         this.$message.error("spu分页数据获取失败");
       }
     },
+    // 三级列表发生变化请求数据
     changeHandle(category) {
       this.category = category;
       this.getSpuList(this.page, this.limit);
@@ -97,12 +98,14 @@ export default {
     this.$bus.$on("change", this.changeHandle);
     // 当点击一级和二级列表时，要清空数据
     this.$bus.$on("showAttrList", this.showAttrListHandle);
+    this.$bus.$on("showList", this.getSpuList);
   },
   beforeDestroy() {
     // 要解绑全局事件总线
     this.$bus.$off("change", this.changeHandle);
     // 解绑全局事件总线事件
     this.$bus.$off("showAttrList", this.showAttrListHandle);
+    this.$bus.$off("showList", this.getSpuList);
   },
 };
 </script>
