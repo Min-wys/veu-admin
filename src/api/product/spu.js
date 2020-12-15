@@ -24,10 +24,11 @@ export default {
     });
   },
   // 保存商品基本信息/admin/product/saveSpuInfo
-  saveSpuInfo(spuId) {
+  saveSpuInfo(data) {
     return request({
       url: `${API_NAME}/saveSpuInfo`,
-      method: "POST"
+      method: "POST",
+      data
     });
   },
   // 获取分页数据/admin/product/{page}/{limit}
@@ -66,6 +67,14 @@ export default {
     return request({
       method: "GET",
       url: `${API_NAME}/baseSaleAttrList`
+    });
+  },
+  // 更新spu的销售属性数据POST /admin/product/updateSpuInfo
+  updateSpuInfo(spu) {
+    return request({
+      method: "POST",
+      url: `${API_NAME}/updateSpuInfo`,
+      data: spu
     });
   }
 };

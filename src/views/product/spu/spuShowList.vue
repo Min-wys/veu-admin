@@ -4,6 +4,7 @@
       type="primary"
       icon="el-icon-plus"
       :disabled="!category.category3Id"
+      @click="addSpu"
       >添加SPU</el-button
     >
 
@@ -62,8 +63,12 @@ export default {
     };
   },
   methods: {
+    // 添加spu按钮
+    addSpu() {
+      this.$emit("showUpdateList");
+    },
     // 获取spu分页数据
-    async getSpuList(page = 1, limit = 3) {
+    async getSpuList(page, limit) {
       const { category3Id } = this.category;
       const result = await this.$API.spu.getSpuList({
         page,
@@ -98,14 +103,12 @@ export default {
     this.$bus.$on("change", this.changeHandle);
     // 当点击一级和二级列表时，要清空数据
     this.$bus.$on("showAttrList", this.showAttrListHandle);
-    this.$bus.$on("showList", this.getSpuList);
   },
   beforeDestroy() {
     // 要解绑全局事件总线
     this.$bus.$off("change", this.changeHandle);
     // 解绑全局事件总线事件
     this.$bus.$off("showAttrList", this.showAttrListHandle);
-    this.$bus.$off("showList", this.getSpuList);
   },
 };
 </script>

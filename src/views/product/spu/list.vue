@@ -5,12 +5,17 @@
       @clearList 当1级分类和2级分类触发的时候触发，清空列表
       :disabled 决定select是否可以使用
      -->
-    <Category />
+    <Category :disabled="!isShowList" />
     <!--
       v-show 组件虽然是隐藏的，但是组件被加载了~
      -->
     <SpuShowList v-if="isShowList" @showUpdateList="showUpdateList" />
-    <SpuUpdateList v-else :item="item" />
+    <SpuUpdateList
+      v-else
+      :item="item"
+      @spuUpdateListShow="spuUpdateListShow"
+      :category3Id="category.category3Id"
+    />
   </div>
 </template>
 
@@ -18,6 +23,7 @@
 import Category from "@/components/Category";
 import SpuShowList from "./spuShowList";
 import SpuUpdateList from "./spuUpdateList";
+import { category } from "@/api";
 
 export default {
   name: "SpuList",
@@ -25,6 +31,7 @@ export default {
     return {
       isShowList: true,
       item: {},
+      category: {},
     };
   },
   methods: {
@@ -33,9 +40,15 @@ export default {
       this.item = { ...row };
     },
     // 关闭更新页面
-    showUpdateListCancel() {
+    spuUpdateListShow(category3Id) {
       this.isShowList = true;
-      this.$bus.$emit("showList");
+      // 重新请求一下数据
+      this.$nextTick(() => {
+        this.$bus.$emit("change", { category3Id });
+      });
+    },
+    getCategory(category) {
+      this.category = category;
     },
   },
   components: {
@@ -44,8 +57,7 @@ export default {
     SpuUpdateList,
   },
   mounted() {
-    // 关闭更新页面
-    this.$bus.$on("cancel", this.showUpdateListCancel);
+    this.$bus.$on("change", this.getCategory);
   },
 };
 </script>

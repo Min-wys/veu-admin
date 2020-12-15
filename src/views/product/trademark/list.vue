@@ -158,7 +158,7 @@ export default {
       if (!isLt) {
         this.$message.error("上传品牌图片大小不能超过 50kB!");
       }
-      return isImgType && isImgType;
+      return isImgType && isLt;
     },
     // 表单提交事件
     submitForm(form) {
