@@ -4,7 +4,7 @@
       type="primary"
       icon="el-icon-plus"
       :disabled="!category.category3Id"
-      @click="addSpu"
+      @click="$emit('showUpdateList', { category3Id: category.category3Id })"
       >添加SPU</el-button
     >
 
@@ -63,10 +63,6 @@ export default {
     };
   },
   methods: {
-    // 添加spu按钮
-    addSpu() {
-      this.$emit("showUpdateList");
-    },
     // 获取spu分页数据
     async getSpuList(page, limit) {
       const { category3Id } = this.category;

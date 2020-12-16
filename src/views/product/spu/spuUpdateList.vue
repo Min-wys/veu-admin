@@ -115,8 +115,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="save">保存</el-button>
-        <el-button
-          @click="$emit('spuUpdateListShow', spu.category3Id || category3Id)"
+        <el-button @click="$emit('spuUpdateListShow', spu.category3Id)"
           >取消</el-button
         >
       </el-form-item>
@@ -152,7 +151,7 @@ export default {
       },
     };
   },
-  props: ["item", "category3Id"],
+  props: ["item"],
   computed: {
     // 所有的spu的销售属性数据要过滤掉所有spu的销售属性
     filterSaleAttrList() {
@@ -226,15 +225,13 @@ export default {
             spuImageList: this.spuImageList,
             spuSaleAttrList: this.spuSaleAttrList,
           };
-          console.log(spu);
           let result;
           // 根据id进行判断是修改数据还是删除数据
           if (this.spu.id) {
             // 发送修改请求
             result = await this.$API.spu.updateSpuInfo(spu);
           } else {
-            // 添加3id
-            spu.category3Id = this.category3Id;
+            // 发送添加请求
             result = await this.$API.spu.saveSpuInfo(spu);
           }
 
@@ -272,22 +269,22 @@ export default {
     handleInputConfirm(row) {
       // 如果输入框的内容有值就直接添加
       if (this.inputValue) {
-        const spuSaleAttr = {
+        //   const spuSaleAttr = {
+        //     baseSaleAttrId: row.baseSaleAttrId,
+        //     saleAttrName: row.saleAttrName,
+        //     saleAttrValueName: this.inputValue,
+        //     // spuId: row.spuId,
+        //   };
+        //   if (this.spu.id) {
+        //     spuSaleAttr.spuId = this.spu.id;
+        //   }
+        //   row.spuSaleAttrValueList.push(spuSaleAttr);
+        row.spuSaleAttrValueList.push({
           baseSaleAttrId: row.baseSaleAttrId,
           saleAttrName: row.saleAttrName,
           saleAttrValueName: this.inputValue,
-          // spuId: row.spuId,
-        };
-        if (this.spu.id) {
-          spuSaleAttr.spuId = this.spu.id;
-        }
-        row.spuSaleAttrValueList.push(spuSaleAttr);
-        // row.spuSaleAttrValueList.push({
-        //   baseSaleAttrId: row.baseSaleAttrId,
-        //   saleAttrName: row.saleAttrName,
-        //   saleAttrValueName: this.inputValue,
-        //   spuId: row.spuId,
-        // });
+          spuId: row.spuId,
+        });
         // 清空输入框的内容
         this.inputValue = "";
       }
@@ -296,26 +293,26 @@ export default {
     },
     // 图片上传成功
     handleAvatarSuccess(res, file) {
-      const ImageList = {
-        // 上传图片要添加一个uid属性，才不会出现闪烁的情况
-        uid: file.uid,
-        imgName: file.url,
-        imgUrl: res.data,
-        // spuId: this.spu.id,
-      };
-      if (this.spu.id) {
-        ImageList.spuId = this.spu.id;
-      }
-      this.spuImageList.push(ImageList);
-      // 给spu图片的数组添加一个数值
-      // res返回上传成功结果, file：当前上传的图片信息
-      // this.spuImageList.push({
+      // const ImageList = {
       //   // 上传图片要添加一个uid属性，才不会出现闪烁的情况
       //   uid: file.uid,
       //   imgName: file.url,
       //   imgUrl: res.data,
-      //   spuId: this.spu.id,
-      // });
+      //   // spuId: this.spu.id,
+      // };
+      // if (this.spu.id) {
+      //   ImageList.spuId = this.spu.id;
+      // }
+      // this.spuImageList.push(ImageList);
+      // 给spu图片的数组添加一个数值
+      // res返回上传成功结果, file：当前上传的图片信息
+      this.spuImageList.push({
+        // 上传图片要添加一个uid属性，才不会出现闪烁的情况
+        uid: file.uid,
+        imgName: file.url,
+        imgUrl: res.data,
+        spuId: this.spu.id,
+      });
     },
     // 点击添加销售属性
     // addSaleAttr(saleAttrId) {
@@ -343,22 +340,22 @@ export default {
     addSaleAttr(sale) {
       // sale的值是${sale.id}-${sale.name}
       const [baseSaleAttrId, saleAttrName] = sale.split("-");
-      const spuSaleAttr = {
-        saleAttrName,
-        baseSaleAttrId: +baseSaleAttrId,
-        spuSaleAttrValueList: [],
-        // spuId: this.spu.id,
-      };
-      if (this.spu.id) {
-        spuSaleAttr.spuId = this.spu.id;
-      }
-      this.spuSaleAttrList.push(spuSaleAttr);
-      // this.spuSaleAttrList.push({
+      // const spuSaleAttr = {
       //   saleAttrName,
       //   baseSaleAttrId: +baseSaleAttrId,
       //   spuSaleAttrValueList: [],
-      //   spuId: this.spu.id,
-      // });
+      //   // spuId: this.spu.id,
+      // };
+      // if (this.spu.id) {
+      //   spuSaleAttr.spuId = this.spu.id;
+      // }
+      // this.spuSaleAttrList.push(spuSaleAttr);
+      this.spuSaleAttrList.push({
+        saleAttrName,
+        baseSaleAttrId: +baseSaleAttrId,
+        spuSaleAttrValueList: [],
+        spuId: this.spu.id,
+      });
       // 清空select输入框的数据
       this.spu.sale = "";
     },

@@ -14,7 +14,6 @@
       v-else
       :item="item"
       @spuUpdateListShow="spuUpdateListShow"
-      :category3Id="category.category3Id"
     />
   </div>
 </template>
@@ -31,7 +30,6 @@ export default {
     return {
       isShowList: true,
       item: {},
-      category: {},
     };
   },
   methods: {
@@ -44,20 +42,15 @@ export default {
       this.isShowList = true;
       // 重新请求一下数据
       this.$nextTick(() => {
+        // 触发spuShowList页面
         this.$bus.$emit("change", { category3Id });
       });
-    },
-    getCategory(category) {
-      this.category = category;
     },
   },
   components: {
     Category,
     SpuShowList,
     SpuUpdateList,
-  },
-  mounted() {
-    this.$bus.$on("change", this.getCategory);
   },
 };
 </script>
