@@ -105,16 +105,6 @@ export default {
         category3Id: category3,
       };
       this.$bus.$emit("change", attrs);
-
-      // const result = await this.$API.attr.getAttrsList(attrs);
-      // if (result.code === 200) {
-      //   this.$message.success("属性数据请求成功");
-      //   // this.category3 = result.data;
-      //   // 传递属性数据
-      // this.$emit("change", result.data);
-      // } else {
-      //   this.$message.error("属性数据请求失败");
-      // }
     },
   },
   async mounted() {

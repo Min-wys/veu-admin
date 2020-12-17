@@ -16,7 +16,12 @@
       <el-table-column prop="description" label="SPU描述"> </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="{ row }">
-          <el-button type="primary" icon="el-icon-plus" size="mini"></el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-plus"
+            size="mini"
+            @click="$emit('showSpuList', { ...row, ...category })"
+          ></el-button>
           <el-button
             type="primary"
             icon="el-icon-edit"
@@ -24,11 +29,17 @@
             @click="$emit('showUpdateList', row)"
           ></el-button>
           <el-button type="info" icon="el-icon-info" size="mini"></el-button>
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            size="mini"
-          ></el-button>
+          <el-popconfirm
+            @onConfirm="del(row)"
+            :title="`确定删除 ${row.saleAttrName} 吗？`"
+          >
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              slot="reference"
+            ></el-button
+          ></el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -63,6 +74,17 @@ export default {
     };
   },
   methods: {
+    // 删除数据
+    async del(row) {
+      const result = await this.$API.spu.deleteSpu(row.id);
+      if (result.code === 200) {
+        this.$message.success("删除成功");
+        // 重新获取一下当前数据
+        this.getSpuList(this.page, this.limit);
+      } else {
+        this.$message.error("删除失败");
+      }
+    },
     // 获取spu分页数据
     async getSpuList(page, limit) {
       const { category3Id } = this.category;
