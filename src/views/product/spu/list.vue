@@ -38,7 +38,7 @@ export default {
   data() {
     return {
       isShowList: true, // 控制添加spu显示隐藏
-      item: {},
+      item: {}, // 传递给更新组件的数据
       isShowspuList: false, // 控制添加sku显示隐藏
       skuItem: {},
     };
@@ -50,13 +50,13 @@ export default {
       // 克隆数据
       this.item = { ...row };
     },
-    // 关闭更新页面
-    spuUpdateListShow(category3Id) {
+    // 关闭更新页面 参数是三个categoryid
+    spuUpdateListShow(category) {
       this.isShowList = true;
       // 重新请求一下数据
       this.$nextTick(() => {
         // 触发spuShowList页面
-        this.$bus.$emit("change", { category3Id });
+        this.$bus.$emit("change", category);
       });
     },
     // 点击加号触发
