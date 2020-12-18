@@ -120,6 +120,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import Category from "@/components/Category";
 
 export default {
@@ -135,23 +136,17 @@ export default {
         categoryId: "", // 当前第3级分类ID
         categoryLevel: 3, // 分类级别
       },
-      category: {
-        //三个id值
-        category1Id: "",
-        category2Id: "",
-        category3Id: "",
-      },
+      // category: {
+      //   //三个id值
+      //   category1Id: "",
+      //   category2Id: "",
+      //   category3Id: "",
+      // },
     };
   },
   components: {
     Category,
   },
-  // watch: {
-  //   category() {
-  //     this.attr.attrValueList = [];
-  //     // this.category.category3Id = "";
-  //   },
-  // },
   // 解决获取焦点失效
   // directives: {
   //   focus: {
@@ -160,11 +155,31 @@ export default {
   //     }
   //   }
   // },
+  computed: {
+    ...mapState({
+      category: (state) => state.category.category,
+    }),
+  },
+  watch: {
+    "category.category3Id": {
+      handler(category3Id) {
+        if (!category3Id) return;
+        this.getAttrsList();
+      },
+      immediate: true, // 一上来触发一次
+    },
+    // 变化清空列表
+    "category.category1Id"() {
+      this.showAttrList();
+    },
+    "category.category2Id"() {
+      this.showAttrList();
+    },
+  },
   methods: {
     // 子向父级传递数据
-    async getAttrsList(category) {
-      this.category = category;
-      const result = await this.$API.attr.getAttrsList(category);
+    async getAttrsList() {
+      const result = await this.$API.attr.getAttrsList(this.category);
       if (result.code === 200) {
         this.$message.success("属性数据请求成功");
         this.attrList = result.data;
@@ -252,13 +267,13 @@ export default {
       this.category.category3Id = "";
     },
   },
-  mounted() {
-    this.$bus.$on("change", this.getAttrsList);
-    this.$bus.$on("showAttrList", this.showAttrList);
-  },
-  beforeDestroy() {
-    this.$bus.$off("change", this.getAttrsList);
-    this.$bus.$off("showAttrList", this.showAttrList);
-  },
+  // mounted() {
+  //   this.$bus.$on("change", this.getAttrsList);
+  //   this.$bus.$on("showAttrList", this.showAttrList);
+  // },
+  // beforeDestroy() {
+  //   this.$bus.$off("change", this.getAttrsList);
+  //   this.$bus.$off("showAttrList", this.showAttrList);
+  // },
 };
 </script>

@@ -116,16 +116,7 @@
       <el-form-item>
         <el-button type="primary" @click="save">保存</el-button>
         <!-- 点击取消按钮将三个按钮传递父组件 -->
-        <el-button
-          @click="
-            $emit('spuUpdateListShow', {
-              category1Id: spu.category1Id,
-              category2Id: spu.category2Id,
-              category3Id: spu.category3Id,
-            })
-          "
-          >取消</el-button
-        >
+        <el-button @click="$emit('spuUpdateListShow')">取消</el-button>
       </el-form-item>
     </el-form>
     <el-dialog :visible.sync="dialogVisible">
@@ -246,8 +237,8 @@ export default {
           if (result.code === 200) {
             this.$message.success("spu数据更新成功");
             this.$emit(
-              "spuUpdateListShow",
-              this.spu.category3Id || this.category3Id
+              "spuUpdateListShow"
+              // this.spu.category3Id || this.category3Id
             );
           } else {
             this.$message.error(result.message);

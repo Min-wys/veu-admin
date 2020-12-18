@@ -91,6 +91,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "SpuList",
   props: ["skuItem"],
@@ -110,6 +111,12 @@ export default {
       attrsList: [], // 平台属性
     };
   },
+  computed: {
+    category: (state) => state.category.category,
+  },
+
+
+    
   methods: {
     // 获取当前spu的销售属性数据
     async getSpuSaleAttrList() {
@@ -134,11 +141,7 @@ export default {
     },
     // 获取平台属性数据
     async getAttrsList() {
-      const result = await this.$API.attr.getAttrsList({
-        category1Id: this.spu.category1Id,
-        category2Id: this.spu.category2Id,
-        category3Id: this.spu.category3Id,
-      });
+      const result = await this.$API.attr.getAttrsList(this.category);
       if (result.code === 200) {
         this.$message.success("所有平台数据获取成功");
         // 进行过滤数值，elementui中要求是name和url的形式

@@ -58,20 +58,42 @@
 </template>
 
 <script>
+import { mapState, mapActions } from "vuex";
+
 export default {
   name: "SpuShowList",
   data() {
     return {
       spuList: [],
-      category: {
-        category1Id: "", // 一级列表id
-        category2Id: "",
-        category3Id: "",
-      },
+      // category: {
+      //   category1Id: "", // 一级列表id
+      //   category2Id: "",
+      //   category3Id: "",
+      // },
       page: 1,
       limit: 3,
       total: 0,
     };
+  },
+  computed: {
+    ...mapState({
+      category: (state) => state.category.category,
+    }),
+  },
+  watch: {
+    "category.category3Id": {
+      handler(category3Id) {
+        if (!category3Id) return;
+        this.changeHandle(this.page, this.limit);
+      },
+      immediate: true, // 一上来触发一次
+    },
+    "category.category1Id"() {
+      this.showAttrListHandle();
+    },
+    "category.category2Id"() {
+      this.showAttrListHandle();
+    },
   },
   methods: {
     // 删除数据
@@ -103,7 +125,6 @@ export default {
     },
     // 三级列表发生变化请求数据
     changeHandle(category) {
-      this.category = category;
       this.getSpuList(this.page, this.limit);
     },
     // 当点击一级和二级列表时，要清空数据
@@ -116,18 +137,19 @@ export default {
       this.category.category3Id = "";
     },
   },
-  mounted() {
-    // 当三级列表输入框发生变化时，请求spu分页数据
-    this.$bus.$on("change", this.changeHandle);
-    // 当点击一级和二级列表时，要清空数据
-    this.$bus.$on("showAttrList", this.showAttrListHandle);
-  },
-  beforeDestroy() {
-    // 要解绑全局事件总线
-    this.$bus.$off("change", this.changeHandle);
-    // 解绑全局事件总线事件
-    this.$bus.$off("showAttrList", this.showAttrListHandle);
-  },
+
+  // mounted() {
+  //   // 当三级列表输入框发生变化时，请求spu分页数据
+  //   this.$bus.$on("change", this.changeHandle);
+  //   // 当点击一级和二级列表时，要清空数据
+  //   this.$bus.$on("showAttrList", this.showAttrListHandle);
+  // },
+  // beforeDestroy() {
+  //   // 要解绑全局事件总线
+  //   this.$bus.$off("change", this.changeHandle);
+  //   // 解绑全局事件总线事件
+  //   this.$bus.$off("showAttrList", this.showAttrListHandle);
+  // },
 };
 </script>
 

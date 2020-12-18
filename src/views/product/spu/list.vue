@@ -54,10 +54,10 @@ export default {
     spuUpdateListShow(category) {
       this.isShowList = true;
       // 重新请求一下数据
-      this.$nextTick(() => {
-        // 触发spuShowList页面
-        this.$bus.$emit("change", category);
-      });
+      // this.$nextTick(() => {
+      //   // 触发spuShowList页面
+      //   this.$bus.$emit("change", category);
+      // });
     },
     // 点击加号触发
     showSpuList(row) {
