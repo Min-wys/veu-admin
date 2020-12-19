@@ -120,7 +120,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 import Category from "@/components/Category";
 
 export default {
@@ -177,6 +177,7 @@ export default {
     },
   },
   methods: {
+    ...mapMutations(["category/RESET_CATEGORY_ID"]),
     // 子向父级传递数据
     async getAttrsList() {
       const result = await this.$API.attr.getAttrsList(this.category);
@@ -271,9 +272,10 @@ export default {
   //   this.$bus.$on("change", this.getAttrsList);
   //   this.$bus.$on("showAttrList", this.showAttrList);
   // },
-  // beforeDestroy() {
-  //   this.$bus.$off("change", this.getAttrsList);
-  //   this.$bus.$off("showAttrList", this.showAttrList);
-  // },
+  beforeDestroy() {
+    // this.$bus.$off("change", this.getAttrsList);
+    // this.$bus.$off("showAttrList", this.showAttrList);
+    this["category/RESET_CATEGORY_ID"]();
+  },
 };
 </script>

@@ -8,7 +8,11 @@
     <!--
       v-show 组件虽然是隐藏的，但是组件被加载了
      -->
-    <SpuList v-if="isShowspuList" :skuItem="skuItem" />
+    <SpuList
+      v-if="isShowspuList"
+      :skuItem="skuItem"
+      @spuUpdateListShow="spuUpdateListShow"
+    />
 
     <div v-else>
       <Category :disabled="!isShowList" />
@@ -51,8 +55,9 @@ export default {
       this.item = { ...row };
     },
     // 关闭更新页面 参数是三个categoryid
-    spuUpdateListShow(category) {
+    spuUpdateListShow() {
       this.isShowList = true;
+      this.isShowspuList = false;
       // 重新请求一下数据
       // this.$nextTick(() => {
       //   // 触发spuShowList页面
@@ -64,6 +69,9 @@ export default {
       this.isShowspuList = true;
       this.skuItem = { ...row };
     },
+  },
+  beforeDestroy() {
+    this.$store.commit("category/RESET_CATEGORY_ID");
   },
   components: {
     Category,

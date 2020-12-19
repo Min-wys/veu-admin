@@ -1,6 +1,7 @@
 import { Message } from "element-ui";
-import * as API from "@/api";
-
+// import * as API from "@/api";
+import API from "@/api";
+// const loginAPI = API.login;
 export default {
   namespaced: true,
   state: {
@@ -94,6 +95,12 @@ export default {
     // 获取三id
     SET_CATEGORY3_ID(state, category3Id) {
       state.category.category3Id = category3Id;
+    },
+    // 清空三个id值
+    RESET_CATEGORY_ID(state) {
+      state.category.category1Id = "";
+      state.category.category2Id = "";
+      state.category.category3Id = "";
     }
   },
   getters: {}

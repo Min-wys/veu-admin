@@ -146,9 +146,10 @@ export default {
   // },
   // beforeDestroy() {
   //   // 要解绑全局事件总线
-  //   this.$bus.$off("change", this.changeHandle);
+  //   // this.$bus.$off("change", this.changeHandle);
   //   // 解绑全局事件总线事件
-  //   this.$bus.$off("showAttrList", this.showAttrListHandle);
+  //   // this.$bus.$off("showAttrList", this.showAttrListHandle);
+  //   this.$store.commit("category/RESET_CATEGORY_ID");
   // },
 };
 </script>
