@@ -42,7 +42,8 @@ console.log(API);
 // 引入准备全局注册的组件
 import HintButton from "@/components/HintButton";
 import CategorySelector from "@/components/CategorySelector";
-
+import ViserVue from "viser-vue";
+Vue.use(ViserVue);
 // 注册全局组件
 Vue.component("HintButton", HintButton);
 Vue.component("CategorySelector", CategorySelector);
